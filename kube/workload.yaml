@@ -1,0 +1,17 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: restful
+spec:
+  selector:
+    matchLabels:
+      app: restful
+  replicas: 1
+  template: # template for the pods
+    metadata:
+      labels:
+        app: restful
+    spec:
+      containers:
+        - name: restful
+          image: dbeken85/restful

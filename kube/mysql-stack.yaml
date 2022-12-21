@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: database
+spec:
+  selector:
+    matchLabels:
+      app: database
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: database
+    spec:
+      containers:
+        - name: database
+          image: mysql:latest
+          env:
+            - name: "MYSQL_DATABASE"
+              value: "user_management"
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-secret
+                  key: password
+          ports:
+            - containerPort: 3306
+              name: database
+          volumeMounts:
+            # Specify the volume to mount to mysqlDb Pod (fix)
+            - name: mysql-persistent-storage
+              mountPath: /var/lib/mysql
+      volumes:
+        # Specified in API documentation -> where to get the volume from
+        - name: mysql-persistent-storage
+          # hostPath: # Inside host machine -> Minikube VM
+          # Inside the MinikubeVM
+          #  path: /mnt/some/directory/structure
+          # type: DirectoryOrCreate
+          # Don't do hardcoded -> add a pointer to mount the volume..
+          persistentVolumeClaim:
+            claimName: mysql-pvc
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: database
+spec:
+  # This defines which pods are going to be represented by this Service
+  # The service becomes a network endpoint for either other services
+  # or maybe external users to connect to (eg browser)
+  selector:
+    app: database
+  ports:
+    - name: database
+      port: 3306
+      # nodePort: 30020
+  #type: ClusterIP # we will access it via gui -> In AWS use it as nodePort

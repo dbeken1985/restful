@@ -1,0 +1,29 @@
+# What do we want
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-pvc
+spec:
+  # Link to PV -> label, access & size will be checked!!
+  storageClassName: mylocalstorage2
+  accessModes:
+    - ReadWriteOnce # Volume should be mounted by a single node
+  resources:
+    requests:
+      storage: 2Gi
+
+---
+# How do we want it to be implemented (in Kubernetes Cluster -> can be local Minikube VM or in cloud)
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: local-storage
+spec:
+  storageClassName: mylocalstorage2
+  capacity:
+    storage: 2Gi
+  accessModes:
+    - ReadWriteOnce # Volume should be mounted by a single node
+  hostPath:
+    path: "/mnt/someNew2/directory/structure/"
+    type: DirectoryOrCreate
